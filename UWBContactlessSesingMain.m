@@ -138,16 +138,9 @@ fft_var_arr = [];
 fft_std_arr = [];
 fft_med_arr = [];
 count = 0;
-for k = 1:20:(size(th_scans,1))-25
-    
+for k = 1:20:(size(th_scans,1))-25   
     if(k+25<size(th_scans,1)-25)
-        
-        
-        %k=k-5;
         th_scans_win = (th_scans(k:k+24,:));
-        
-        disp(k);
-        disp(k+24);
         mean_win = mean(th_scans_win,1);
         max_win = max(th_scans_win);
         min_win = min(th_scans_win);
@@ -159,15 +152,6 @@ for k = 1:20:(size(th_scans,1))-25
         fft_med_win = median(fft(th_scans_win,[],1),1);
         %disp(size(mean_win));  
         count = count+1;
-        %mean_arr(k,:) = mean_win;
-        %max_arr(k,:) = max_win;
-        %min_arr(k,:) = min_win;
-        %fft_mean_arr(k,:) = fft_mean_win;
-        %fft_max_arr(k,:) = fft_max_win;
-        %fft_min_arr(k,:) = fft_min_win;
-        %fft_var_arr(k,:) = fft_var_win;
-        %fft_std_arr(k,:) = fft_std_win;
-        %fft_med_arr(k,:) = fft_med_win;
     else
         break;
     end
@@ -180,8 +164,6 @@ for k = 1:20:(size(th_scans,1))-25
         fft_var_arr = [fft_var_arr;fft_var_win];
         fft_std_arr = [fft_std_arr;fft_std_win];
         fft_med_arr = [fft_med_arr;fft_med_win];    
-    %k=k-5;
-    
 end
 mean_arr = reshape(mean_arr,size(mean_arr,1)*size(mean_arr,2),1);
 max_arr = reshape(max_arr,size(max_arr,1)*size(max_arr,2),1);
@@ -194,7 +176,6 @@ fft_std_arr = reshape(fft_std_arr,size(fft_std_arr,1)*size(fft_std_arr,2),1);
 fft_med_arr = reshape(fft_med_arr,size(fft_med_arr,1)*size(fft_med_arr,2),1);
 
 disp(size(mean_arr));        
-%disp(size(th_scans_win));
 disp(size(fft_min_arr));
 disp(size(min_arr));
 disp(count); 
