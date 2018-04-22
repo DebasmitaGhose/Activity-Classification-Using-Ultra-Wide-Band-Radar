@@ -144,12 +144,12 @@ for k = 1:20:(size(th_scans,1))-25
         mean_win = mean(th_scans_win,1);
         max_win = max(th_scans_win);
         min_win = min(th_scans_win);
-        fft_mean_win = mean(fft(th_scans_win,[],1),1);
-        fft_max_win = max(fft(th_scans_win,[],1));
-        fft_min_win = min(fft(th_scans_win,[],1));
-        fft_var_win = var(fft(th_scans_win,[],1),[],1);
-        fft_std_win = std(fft(th_scans_win,[],1),[],1);
-        fft_med_win = median(fft(th_scans_win,[],1),1);
+        fft_mean_win = abs(mean(fft(th_scans_win,[],1),1));
+        fft_max_win = abs(max(fft(th_scans_win,[],1)));
+        fft_min_win = abs(min(fft(th_scans_win,[],1)));
+        fft_var_win = abs(var(fft(th_scans_win,[],1),[],1));
+        fft_std_win = abs(std(fft(th_scans_win,[],1),[],1));
+        fft_med_win = abs(median(fft(th_scans_win,[],1),1));
         %disp(size(mean_win));  
         count = count+1;
     else
@@ -183,3 +183,10 @@ disp(count);
 %stacking
 feature_vector = cat(2,mean_arr,max_arr,min_arr,fft_mean_arr,fft_max_arr,fft_min_arr,fft_var_arr,fft_std_arr,fft_med_arr);
 
+%activity id
+feature_vector = cat(2,feature_vector,repmat(6,size(mean_arr)));
+
+%subject id
+fv = cat(2,feature_vector,repmat(1,size(mean_arr)));
+
+disp(size(fv));
