@@ -78,8 +78,22 @@ weighted_matrix = envNoClutterscansV.*Rbin;
 P = [];
 for i=1:size(envNoClutterscansV,2)
     [peaks_1,ind_1] = findpeaks(envNoClutterscansV(:,i));
-    %P = [P,ind];
+    %P = [P;ind_1];
 end
+%plot(Rbin(ind_1),IDdat);
+for i = 1:size(envNoClutterscansV,1)
+    [~,ind] = max(envNoClutterscansV(i,:));
+    P = [P;ind];
+end
+[p,a]= findpeaks(Rbin(P));
+pre = 1:min(a)-1;
+pre = size(pre,2);
+post = max(a)+1:size(envNoClutterscansV,1);
+post = size(post,2);
+plot([zeros(pre,1)' IDdat(a(1):a(end)) zeros(post,1)'],Rbin(P))
+figure;
+plot(IDdat,Rbin(P));
+
 for j = 1:size(envNoClutterscansV,1)
     [peaks_2,ind_2] = findpeaks(envNoClutterscansV(j,:));
 end
@@ -87,19 +101,20 @@ end
 %peaks = medfilt1(peaks);
 disp(size(peaks_1));
 disp(size(peaks_2));
-%plot(Rbin(ind_2),peaks_2)
-%figure;
-%plot(IDdat(ind_1),peaks_1)
-%plot(peaks,Rbin(ind))
-%find the peak value for each row of envNoClutterScan and plot it vs scan
-%number
-%max, medfilt
 [~,idx] = findpeaks(peaks_1,'Threshold',20);%peaks where succesive values drop by x
-th_scans = envNoClutterscansV(:,idx);
-%figure;
-%plot(IDdat(idx),th_scans)
 figure;
-imagesc(Rbin(idx),IDdat,th_scans);
+localized_range = Rbin(idx);
+pre_range = 1:(min(idx)-1);
+pre_range = size(pre_range,2);
+post_range = (max(idx)+1):size(envNoClutterscansV,2);
+post_range = size(post_range,2);
+range_total = [zeros(pre_range,1)' Rbin(idx(1):idx(end)) zeros(post_range,1)'];
+figure;
+%plot(IDdat,range_total);
+envNoClutterscansV(:,1:min(idx)-1) = 0;
+envNoClutterscansV(:,max(idx)+1:size(envNoClutterscansV,2)) = 0;
+th_scans = envNoClutterscansV(:,[1:min(idx)-1,idx(1):idx(end),(max(idx)+1):size(envNoClutterscansV,2)]);
+imagesc(Rbin(idx(1):idx(end)),IDdat,th_scans);
 xlabel('Range (m)')
 ylabel('Scan Number')
 title('Waterfall plot of envelope of no clutter scan_localized')
@@ -123,12 +138,16 @@ fft_var_arr = [];
 fft_std_arr = [];
 fft_med_arr = [];
 count = 0;
-for k = 25:(size(th_scans,1)-25)
+for k = 1:20:(size(th_scans,1))-25
     
     if(k+25<size(th_scans,1)-25)
         
-        th_scans_win = (th_scans(k-5:k+19,:));
         
+        %k=k-5;
+        th_scans_win = (th_scans(k:k+24,:));
+        
+        disp(k);
+        disp(k+24);
         mean_win = mean(th_scans_win,1);
         max_win = max(th_scans_win);
         min_win = min(th_scans_win);
@@ -138,23 +157,22 @@ for k = 25:(size(th_scans,1)-25)
         fft_var_win = var(fft(th_scans_win,[],1),[],1);
         fft_std_win = std(fft(th_scans_win,[],1),[],1);
         fft_med_win = median(fft(th_scans_win,[],1),1);
-        %disp(size(mean_win));
+        %disp(size(mean_win));  
         count = count+1;
-        mean_arr(k,:) = mean_win;
-        max_arr(k,:) = max_win;
-        min_arr(k,:) = min_win;
-        fft_mean_arr(k,:) = fft_mean_win;
-        fft_max_arr(k,:) = fft_max_win;
-        fft_min_arr(k,:) = fft_min_win;
-        fft_var_arr(k,:) = fft_var_win;
-        fft_std_arr(k,:) = fft_std_win;
-        fft_med_arr(k,:) = fft_med_win;
+        %mean_arr(k,:) = mean_win;
+        %max_arr(k,:) = max_win;
+        %min_arr(k,:) = min_win;
+        %fft_mean_arr(k,:) = fft_mean_win;
+        %fft_max_arr(k,:) = fft_max_win;
+        %fft_min_arr(k,:) = fft_min_win;
+        %fft_var_arr(k,:) = fft_var_win;
+        %fft_std_arr(k,:) = fft_std_win;
+        %fft_med_arr(k,:) = fft_med_win;
     else
         break;
     end
         mean_arr = [mean_arr;mean_win];
         max_arr = [max_arr; max_win];
-        %disp(size(max_arr));
         min_arr = [min_arr; min_win];
         fft_mean_arr = [fft_mean_arr;fft_mean_win];
         fft_max_arr = [fft_max_arr;fft_max_win];
@@ -162,12 +180,25 @@ for k = 25:(size(th_scans,1)-25)
         fft_var_arr = [fft_var_arr;fft_var_win];
         fft_std_arr = [fft_std_arr;fft_std_win];
         fft_med_arr = [fft_med_arr;fft_med_win];    
-    k=k+25;
+    %k=k-5;
     
 end
+mean_arr = reshape(mean_arr,size(mean_arr,1)*size(mean_arr,2),1);
+max_arr = reshape(max_arr,size(max_arr,1)*size(max_arr,2),1);
+min_arr = reshape(min_arr,size(min_arr,1)*size(min_arr,2),1);
+fft_mean_arr = reshape(fft_mean_arr,size(fft_mean_arr,1)*size(fft_mean_arr,2),1);
+fft_min_arr = reshape(fft_min_arr,size(fft_min_arr,1)*size(fft_min_arr,2),1);
+fft_max_arr = reshape(fft_max_arr,size(fft_max_arr,1)*size(fft_max_arr,2),1);
+fft_var_arr = reshape(fft_var_arr,size(fft_var_arr,1)*size(fft_var_arr,2),1);
+fft_std_arr = reshape(fft_std_arr,size(fft_std_arr,1)*size(fft_std_arr,2),1);
+fft_med_arr = reshape(fft_med_arr,size(fft_med_arr,1)*size(fft_med_arr,2),1);
 
 disp(size(mean_arr));        
 %disp(size(th_scans_win));
 disp(size(fft_min_arr));
 disp(size(min_arr));
-disp(count)
+disp(count); 
+
+%stacking
+feature_vector = cat(2,mean_arr,max_arr,min_arr,fft_mean_arr,fft_max_arr,fft_min_arr,fft_var_arr,fft_std_arr,fft_med_arr);
+
