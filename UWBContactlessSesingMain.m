@@ -98,36 +98,27 @@ for j = 1:size(envNoClutterscansV,1)
     [peaks_2,ind_2] = findpeaks(envNoClutterscansV(j,:));
 end
 
-%peaks = medfilt1(peaks);
-disp(size(peaks_1));
-disp(size(peaks_2));
 [~,idx] = findpeaks(peaks_1,'Threshold',20);%peaks where succesive values drop by x
-figure;
-localized_range = Rbin(idx);
+
 pre_range = 1:(min(idx)-1);
 pre_range = size(pre_range,2);
+
 post_range = (max(idx)+1):size(envNoClutterscansV,2);
 post_range = size(post_range,2);
+
 range_total = [zeros(pre_range,1)' Rbin(idx(1):idx(end)) zeros(post_range,1)'];
-figure;
-%plot(IDdat,range_total);
+
 envNoClutterscansV(:,1:min(idx)-1) = 0;
 envNoClutterscansV(:,max(idx)+1:size(envNoClutterscansV,2)) = 0;
+
 th_scans = envNoClutterscansV(:,[1:min(idx)-1,idx(1):idx(end),(max(idx)+1):size(envNoClutterscansV,2)]);
 imagesc(Rbin(idx(1):idx(end)),IDdat,th_scans);
-xlabel('Range (m)')
-ylabel('Scan Number')
-title('Waterfall plot of envelope of no clutter scan_localized')
-colorbar
-drawnow
+
 
 
 %% Activity Recognition
 
 %ToDo 2: Extract relevant features and train a contactless activity classifier.
-th_win = [];
-th_scans_win_first = th_scans(1:25,:);
-th_win = [th_win,th_scans_win_first];
 mean_arr = [];
 max_arr = [];
 min_arr = [];
@@ -137,10 +128,14 @@ fft_min_arr = [];
 fft_var_arr = [];
 fft_std_arr = [];
 fft_med_arr = [];
+
 count = 0;
-for k = 1:20:(size(th_scans,1))-25   
+
+for k = 1:5:(size(th_scans,1))-25   
     if(k+25<size(th_scans,1)-25)
         th_scans_win = (th_scans(k:k+24,:));
+        %disp(k);
+        %disp(k+24);
         mean_win = mean(th_scans_win,1);
         max_win = max(th_scans_win);
         min_win = min(th_scans_win);
@@ -149,21 +144,20 @@ for k = 1:20:(size(th_scans,1))-25
         fft_min_win = abs(min(fft(th_scans_win,[],1)));
         fft_var_win = abs(var(fft(th_scans_win,[],1),[],1));
         fft_std_win = abs(std(fft(th_scans_win,[],1),[],1));
-        fft_med_win = abs(median(fft(th_scans_win,[],1),1));
-        %disp(size(mean_win));  
+        fft_med_win = abs(median(fft(th_scans_win,[],1),1));  
         count = count+1;
     else
         break;
     end
-        mean_arr = [mean_arr;mean_win];
-        max_arr = [max_arr; max_win];
-        min_arr = [min_arr; min_win];
-        fft_mean_arr = [fft_mean_arr;fft_mean_win];
-        fft_max_arr = [fft_max_arr;fft_max_win];
-        fft_min_arr = [fft_min_arr;fft_min_win];
-        fft_var_arr = [fft_var_arr;fft_var_win];
-        fft_std_arr = [fft_std_arr;fft_std_win];
-        fft_med_arr = [fft_med_arr;fft_med_win];    
+    mean_arr = [mean_arr;mean_win];
+    max_arr = [max_arr; max_win];
+    min_arr = [min_arr; min_win];
+    fft_mean_arr = [fft_mean_arr;fft_mean_win];
+    fft_max_arr = [fft_max_arr;fft_max_win];
+    fft_min_arr = [fft_min_arr;fft_min_win];
+    fft_var_arr = [fft_var_arr;fft_var_win];
+    fft_std_arr = [fft_std_arr;fft_std_win];
+    fft_med_arr = [fft_med_arr;fft_med_win];    
 end
 mean_arr = reshape(mean_arr,size(mean_arr,1)*size(mean_arr,2),1);
 max_arr = reshape(max_arr,size(max_arr,1)*size(max_arr,2),1);
@@ -190,3 +184,5 @@ feature_vector = cat(2,feature_vector,repmat(6,size(mean_arr)));
 fv = cat(2,feature_vector,repmat(1,size(mean_arr)));
 
 disp(size(fv));
+
+csvwrite('1_6.csv',fv);
